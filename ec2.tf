@@ -2,27 +2,47 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_instance" "demo-ec2" {
-  ami           = "ami-019715e0d74f695be"
-  instance_type = "t3.micro"
-  key_name      = "siddhesh-key-pair"
+resource "aws_security_group" "web_sg" {
+  name = "web_sg"
 
-  vpc_security_group_ids = ["sg-05c75c81969af1873"]
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  user_data = <<-EOF
-#!/bin/bash
-apt update -y
-apt install -y nginx
-systemctl start nginx
-systemctl enable nginx
-EOF
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  tags = {
-    Name = "MyEC2Instance"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
-# Output public IP
-output "ec2_public_ip" {
-  value = aws_instance.demo-ec2.public_ip
+resource "aws_instance" "web" {
+  ami           = "ami-019715e0d74f695be"
+  instance_type = "t2.micro"
+
+  security_groups = [aws_security_group.web_sg.name]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              apt update -y
+              apt install nginx -y
+              systemctl start nginx
+              systemctl enable nginx
+              echo "<h1>Ganesh DevOps Project 🚀</h1>" > /var/www/html/index.html
+              EOF
+
+  tags = {
+    Name = "Terraform-Jenkins-EC2"
+  }
 }
