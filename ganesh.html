@@ -1,86 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Contact Us - Ganesh Website</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #4e73df, #1cc88a);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+provider "aws" {
+  region = "ap-south-1"
+}
 
-        .contact-container {
-            background: white;
-            padding: 30px;
-            width: 350px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
+resource "aws_instance" "demo-ec2" {
+  ami           = "ami-019715e0d74f695be"
+  instance_type = "t3.micro"
+  key_name      = "siddhesh-key-pair"
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+  vpc_security_group_ids = ["sg-05c75c81969af1873"]
 
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+  user_data = <<-EOF
+#!/bin/bash
+apt update -y
+apt install -y nginx
+systemctl start nginx
+systemctl enable nginx
+EOF
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #4e73df;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+  tags = {
+    Name = "MyEC2Instance"
+  }
+}
 
-        button:hover {
-            background: #2e59d9;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 13px;
-            color: gray;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="contact-container">
-        <h2>Contact Us</h2>
-
-        <form action="#" method="post">
-            <input type="text" name="name" placeholder="Your Name" required>
-            
-            <input type="email" name="email" placeholder="Your Email" required>
-            
-            <input type="text" name="subject" placeholder="Subject" required>
-            
-            <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
-            
-            <button type="submit">Send Message</button>
-        </form>
-
-        <div class="footer">
-            © 2026 Ganesh Website
-        </div>
-    </div>
-
-</body>
-</html>
+# Output public IP
+output "ec2_public_ip" {
+  value = aws_instance.demo-ec2.public_ip
+}
