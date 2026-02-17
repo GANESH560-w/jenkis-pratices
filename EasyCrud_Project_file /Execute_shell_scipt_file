@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo "========================================="
+echo "🚀 Starting Backend Deployment"
+echo "========================================="
+
+PROJECT_PATH="/home/ubuntu/CRUDProject-Docker-K83-Project/backend"
+
+cd $PROJECT_PATH || { echo "❌ Backend folder not found!"; exit 1; }
+
+echo "📂 Current Directory:"
+pwd
+
+# Start Docker
+sudo systemctl start docker
+
+# Remove old backend container
+echo "🗑 Removing old backend container..."
+sudo docker rm -f backend 2>/dev/null || true
+
+# Remove old backend image (optional clean rebuild)
+sudo docker rmi -f student-backend 2>/dev/null || true
+
+# Build Backend Image
+echo "🔨 Building Backend Image..."
+sudo docker build -t student-backend .
+
+# Run Backend Container
+echo "▶ Running Backend on Port 8080..."
+sudo docker run -d \
+--name backend \
+-p 8080:8080 \
+student-backend
+
+echo "========================================="
+echo "📦 Container Status:"
+sudo docker ps -a
+echo "========================================="
+
+echo "📜 Backend Logs:"
+sudo docker logs backend 2>/dev/null || true
+
+echo "========================================="
+echo "✅ Backend Deployment Finished"
+echo "========================================="
