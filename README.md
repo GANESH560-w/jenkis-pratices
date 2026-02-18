@@ -1,3 +1,5 @@
+# jenkins install commands 
+
 sudo apt install openjdk-17-jdk -y
 
 sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
